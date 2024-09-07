@@ -1,42 +1,48 @@
 (function () {
 	const plugin = "checksec";
 
+	const ESC = "\033[";
+	const ansiEscapeSeq = (code, content) => `${ESC}${code}m${content}${ESC}m`;
+	const orange = (content) => ansiEscapeSeq(33, content);
+	const green = (content) => ansiEscapeSeq(32, content);
+	const red = (content) => ansiEscapeSeq(31, content);
+
 	const checkRELRO = (info) => {
 		const relro = info.bin.relro;
 
 		if (relro === "no")
-			return "\033[31mNo RELRO\033[m";
+			return red("No RELRO");
 		if (relro === "partial")
-			return "\033[33mPartial RELRO\033[m";
+			return orange("Partial RELRO");
 		if (relro === "full")
-			return "\033[32mFull RELRO\033[m";
+			return green("Full RELRO");
 
 		return `TODO unknown ${relro}`;
 	};
 
 	const checkStackCanary = (info) => {
 		return info.bin.canary
-			? "\033[32mCanary found\033[m"
-			: "\033[31mNo canary found\033[m";
+			? green("Canary found")
+			: red("No canary found");
 	};
 
 	const checkNX = (info) => {
 		return info.bin.nx
-			? "\033[32mNX enabled\033[m"
-			: "\033[31mNX disabled\033[m";
+			? green("NX enabled")
+			: red("NX disabled");
 	};
 
 	const checkPIE = (info) => {
 		return info.bin.pic
-			? "\033[32mPIE enabled\033[m"
-			: "\033[31mNo PIE\033[m";
+			? green("PIE enabled")
+			: red("No PIE");
 	};
 
 	const checkRPath = (info) => {
 		const rpath = info.bin.rpath;
 		return (rpath === "NONE")
-			? "\033[32mNo RPATH\033[m"
-			: "\033[31m" + `RPATH = "${rpath}"` + "\033[m";
+			? green("No RPATH")
+			: red(`RPATH = "${rpath}"`);
 	};
 
 	const checkInsecureFunc = (symbols) => {
