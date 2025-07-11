@@ -1,5 +1,10 @@
 (function () {
-	const plugin = "checksec";
+	const plugin = {
+		"name": "checksec",
+		"license": "GPL3",
+		"desc": "check the security properties of executables",
+		"author": "aviciano",
+	};
 
 	const ESC = "\033[";
 	const ansiEscapeSeq = (code, content) => `${ESC}${code}m${content}${ESC}m`;
@@ -60,16 +65,17 @@
 	};
 
 	const coreCall = (cmd) => {
-		if (!cmd.startsWith(plugin)) {
+		const { name } = plugin;
+		if (!cmd.startsWith(name)) {
 			return false;
 		}
 
-		const args = cmd.substr(plugin.length).trim();
+		const args = cmd.substr(name.length).trim();
 
 		if (args.startsWith("-h") || args.startsWith("?")) {
-			console.log(`Usage: ${plugin} [args]`);
-			console.log(`  ${plugin} -h           - show this help`);
-			console.log(`  ${plugin}              - list security properties of the current binary`);
+			console.log(`Usage: ${name} [args]`);
+			console.log(`  ${name} -h           - show this help`);
+			console.log(`  ${name}              - list security properties of the current binary`);
 		} else if (args === "") {
 			const info = r2.cmdj("ij");
 			console.log(`RELRO         : ${checkRELRO(info)}`);
@@ -84,14 +90,11 @@
 		return true;
 	};
 
-	r2.unload("core", plugin);
+	r2.unload("core", plugin.name);
 	r2.plugin("core", () => {
-		console.log(`==> The '${plugin}' plugin has been instantiated. Type '${plugin}' to test it`);
+		console.debug(`'${plugin.name}' plugin loaded`);
 		return {
-			"name": plugin,
-			"license": "GPL3",
-			"desc": "core plugin to check the security properties of executables",
-			"author": "aviciano",
+			...plugin,
 			"call": coreCall,
 		};
 	});
